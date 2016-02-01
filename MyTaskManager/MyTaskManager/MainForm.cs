@@ -9,16 +9,20 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using MyTaskManager.Model;
 using MyTaskManager.Controller;
+using System.Timers;
 
 namespace MyTaskManager
 {
     public partial class MainForm : Form
     {
+        private bool mouseIn;
         private TaskController taskController = new TaskController();
+        private OpacityController opacityController;
         public MainForm()
         {
             InitializeComponent();
             OnLoad();
+            AllocConsole();
         }
 
 
@@ -29,7 +33,8 @@ namespace MyTaskManager
             taskListBox.DataSource = taskController.taskList;
             taskListBox.DisplayMember = taskController.DisplayMember();
             taskListBox.ValueMember = taskController.ValueMember();
-            
+
+            opacityController = new OpacityController(this);
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -60,6 +65,41 @@ namespace MyTaskManager
         private void taskListBox_DoubleClick(object sender, EventArgs e)
         {
 
+        }
+
+        private void opacityScrollBar_Scroll(object sender, EventArgs e)
+        {
+            this.Opacity = (double)opacityScrollBar.Value/ (double)100;
+        }
+
+        private void MainForm_MouseEnter(object sender, EventArgs e)
+        {
+            this.Opacity = 1;
+            opacityController.StartShowing();
+            Console.WriteLine("Mouse entered..");
+
+        }
+
+        private void MainForm_MouseLeave(object sender, EventArgs e)
+        {
+            if (!ClientRectangle.Contains(PointToClient(Control.MousePosition)))
+            {
+                mouseIn = false;
+                opacityController.StartHiding();
+                Console.WriteLine("MouseLeaved..");
+            }
+            else
+            {
+                this.Opacity = 1;
+                opacityController.StartShowing();
+                Console.WriteLine("Mouse entered..");
+            }
+            
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

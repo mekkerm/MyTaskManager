@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\OpacityController.cs" />
     <Compile Include="Controller\TaskController.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

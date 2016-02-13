@@ -46,7 +46,7 @@ namespace MyTaskManager.Controller
                 {
                     opacity = MINIMUM_OPACITY;
                 }
-                Console.WriteLine("Hiding" + opacity);
+                //Console.WriteLine("Hiding" + opacity);
                 form.Opacity = opacity;
             }
             else

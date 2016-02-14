@@ -15,7 +15,7 @@ namespace MyTaskManager
 {
     public partial class MainForm : Form
     {
-        private TaskController taskController = TaskController.Instance;
+        private TaskController taskController ;
         private OpacityController opacityController;
 
         private Image startImage = Image.FromFile(AppDomain.CurrentDomain.BaseDirectory.ToString() + @"images\Button-Play-icon4.png");
@@ -27,17 +27,14 @@ namespace MyTaskManager
 
         public MainForm()
         {
-            InitializeComponent();
-            OnLoad();
             AllocConsole();
-
-            
+            InitializeComponent();
+            OnLoad(); 
         }
-
-
 
         private void OnLoad()
         {
+            taskController = TaskController.Instance;
             taskListBox.BackColor = Color.FromArgb(129, 203, 40);
             taskListBox.DataSource = taskController.taskList;
             taskListBox.DisplayMember = taskController.DisplayMember();
@@ -48,8 +45,14 @@ namespace MyTaskManager
 
             opacityController = new OpacityController(this);
 
-            DBController contr = new DBController();
-            contr.execute("create Table Tasks");
+            //DBController contr = DBController.Instance;
+            ////contr.execute("select * from Tasks");
+            //var list = contr.GetSavedTasks();
+
+            //foreach(var t in list)
+            //{
+            //    Console.WriteLine(t);
+            //}
         }
 
         private void taskListBox_DrawItem(object sender, DrawItemEventArgs e)
@@ -70,7 +73,7 @@ namespace MyTaskManager
             e.Graphics.DrawString(((Model.Task)taskListBox.Items[e.Index]).Title,
                font, brush, e.Bounds, StringFormat.GenericDefault);
 
-            e.Graphics.DrawString(((Model.Task)taskListBox.Items[e.Index]).EllapsedTime.TotalSeconds.ToString()+" s",
+            e.Graphics.DrawString(((Model.Task)taskListBox.Items[e.Index]).EllapsedTime.ToString(),
                 font, brush, b, StringFormat.GenericDefault);
             // If the ListBox has focus, draw a focus rectangle around the selected item.
             e.DrawFocusRectangle();
@@ -145,6 +148,8 @@ namespace MyTaskManager
                     e.Cancel = true;
                     break;
                 default:
+                    taskController.StopTask();
+                    notifIcon.Dispose();
                     break;
             }
         }
@@ -166,7 +171,7 @@ namespace MyTaskManager
         {
             Model.Task selectedTask = (Model.Task)taskListBox.SelectedItem;
             if (startEnabled) {
-                startPauseButton_Click(selectedTask);
+                startButton_Click(selectedTask);
             }
             else
             {
@@ -174,7 +179,7 @@ namespace MyTaskManager
             }  
         }
 
-        private void startPauseButton_Click(Model.Task selectedTask)
+        private void startButton_Click(Model.Task selectedTask)
         {
             Console.WriteLine("start clicked");
             start_pause_button.Image = pauseImage;

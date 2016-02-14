@@ -237,8 +237,6 @@ namespace MyTaskManager
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
-
-        private NotifyIcon notifIcon;
         private TextBox filterTextBox;
         private ListBox taskListBox;
         private TrackBar opacityScrollBar;
@@ -252,6 +250,7 @@ namespace MyTaskManager
         private Button start_pause_button;
         private Button button2;
         private Button detailsButton;
+        private NotifyIcon notifIcon;
     }
 }
 

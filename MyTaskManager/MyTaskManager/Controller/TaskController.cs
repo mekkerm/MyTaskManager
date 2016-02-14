@@ -15,6 +15,13 @@ namespace MyTaskManager.Controller
         public BindingList<Model.Task> taskList { get; }
 
         private static TaskController _Instance;
+
+        private Model.Task runningTask = null;
+        private Model.TaskTime runningTaskTime = null;
+        private System.Timers.Timer taskTimer = null;
+
+        private RefreshCallback callback;
+
         public static TaskController Instance{ get
             {
                 if(_Instance == null)
@@ -29,19 +36,24 @@ namespace MyTaskManager.Controller
         {
             taskList = new BindingList<Model.Task>();
             //TODO read the tasks from a file or an XML...
-            Model.Task task1 = new Model.Task("Task1");
-            Model.Task task2 = new Model.Task("Task2", "Task2Description");
-            Model.Task task3 = new Model.Task("Task3", "Task2Description");
-            Model.Task task4 = new Model.Task("Task4", "Task2Description");
-            Model.Task task5 = new Model.Task("Task5", "Task2Description");
-            Model.Task task6 = new Model.Task("Task6", "Task2Description");
-            taskList.Add(task1);
-            taskList.Add(task2);
-            taskList.Add(task3);
-            taskList.Add(task4);
-            taskList.Add(task5);
-            taskList.Add(task6);
+            //Model.Task task1 = new Model.Task("Task1");
+            //Model.Task task2 = new Model.Task("Task2", "Task2Description");
+            //Model.Task task3 = new Model.Task("Task3", "Task2Description");
+            //Model.Task task4 = new Model.Task("Task4", "Task2Description");
+            //Model.Task task5 = new Model.Task("Task5", "Task2Description");
+            //Model.Task task6 = new Model.Task("Task6", "Task2Description");
+            //taskList.Add(task1);
+            //taskList.Add(task2);
+            //taskList.Add(task3);
+            //taskList.Add(task4);
+            //taskList.Add(task5);
+            //taskList.Add(task6);
+            foreach (var task in DBController.Instance.GetSavedTasks())
+            {
+                taskList.Add(task);
+            }
         }
+        
 
         public string ValueMember()
         {
@@ -52,9 +64,14 @@ namespace MyTaskManager.Controller
             return "Title";
         }
 
-        public void Add(Model.Task t)
+        public bool Add(Model.Task t)
         {
-            taskList.Add(t);
+            var result = DBController.Instance.AddNewTask(t);
+            if (result)
+            {
+                taskList.Add(t);
+            }
+            return result;
         }
 
         public Model.Task ActiveTask {
@@ -62,10 +79,6 @@ namespace MyTaskManager.Controller
                 return runningTask;
             }
         }
-        private Model.Task  runningTask = null;
-        private System.Timers.Timer taskTimer = null;
-
-        private RefreshCallback callback;
 
         /// <summary>
         /// Starts the given task!
@@ -86,7 +99,10 @@ namespace MyTaskManager.Controller
             taskTimer.Elapsed += TaskTimer_Elapsed;
             taskTimer.SynchronizingObject = control;
             taskTimer.Start();
-            
+
+            runningTaskTime = new TaskTime();
+            runningTaskTime.TaskID = runningTask.ID;
+            runningTaskTime.StartTime = DateTime.Now;
             return true;
         }
 
@@ -102,9 +118,19 @@ namespace MyTaskManager.Controller
 
         public void StopTask()
         {
+            if(taskTimer == null)
+                return;
+
             taskTimer.Stop();
             taskTimer = null;
             runningTask = null;
+            runningTaskTime.EndTime = DateTime.Now;
+
+            var result = DBController.Instance.AddNewTaskTime(runningTaskTime);
+            if (!result)
+            {
+                MessageBox.Show("error!!");
+            }
         }
 
         public delegate void RefreshCallback();

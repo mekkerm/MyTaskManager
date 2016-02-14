@@ -64,6 +64,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\Task.cs" />
+    <Compile Include="Model\TaskTime.cs" />
     <Compile Include="NewTaskForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -71,6 +72,10 @@
       <DependentUpon>NewTaskForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Query\InsertNewTask.cs" />
+    <Compile Include="Query\InsertNewTaskTime.cs" />
+    <Compile Include="Query\Query.cs" />
+    <Compile Include="Query\SelectAllTasks.cs" />
     <Compile Include="TaskDetails.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -45,5 +45,10 @@ namespace MyTaskManager.Model
             this.EllapsedTime = new TimeSpan();
             ID = Guid.NewGuid().ToString();
         }
+
+        public override string ToString()
+        {
+            return ID+" "+Title+" " +Description + " " + CreationDate.ToString();
+        }
     }
 }

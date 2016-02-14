@@ -11,29 +11,96 @@ namespace MyTaskManager.Controller
     public class DBController
     {
         private string connectionString = "Data Source=MTM.Db;Version=3;New=False;Compress=True;";
-        private SQLiteConnection sql_con;
-        private SQLiteCommand sql_cmd;
-        private SQLiteDataAdapter DB;
-        private DataSet DS = new DataSet();
-        private DataTable DT = new DataTable();
+        private static DBController _INSTANCE;
+        
 
-        private void SetConnection()
-        {
-            sql_con = new SQLiteConnection(connectionString);
-        }
-        private void ExecuteQuery(string txtQuery)
-        {
-            SetConnection();
-            sql_con.Open();
-            //sql_cmd = sql_con.CreateCommand();
-            //sql_cmd.CommandText = txtQuery;
-            //sql_cmd.ExecuteNonQuery();
-            sql_con.Close();
+        public static DBController Instance{ get {
+                if (_INSTANCE == null)
+                {
+                    _INSTANCE = new DBController();
+                }
+                return _INSTANCE;
+            }
         }
 
-        public void execute(string text)
+        private DBController() { }
+
+        private SQLiteConnection GetConnection()
         {
-            ExecuteQuery(text);
+            return new SQLiteConnection(connectionString);
         }
+
+        public List<Model.Task> GetSavedTasks()
+        {
+            List<Model.Task> list = new List<Model.Task>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                command.CommandText = new Query.SelectAllTasks().GetQuery();
+                var reader = command.ExecuteReader();
+                list = GetTasks(reader);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Inserts the given task into the Tasks table
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns>returns true if the insert operation finsihed successfully</returns>
+        public bool AddNewTask(Model.Task task)
+        {
+            bool result = false;
+            Query.Query query = new Query.InsertNewTask(task);
+            using (var conn = GetConnection())
+            {
+                result = ExecuteNonQuery(conn, query);
+            }
+
+            return result;
+        }
+
+
+        public bool AddNewTaskTime(Model.TaskTime taskTime)
+        {
+            bool result = false;
+            Query.Query query = new Query.InsertNewTaskTime(taskTime);
+            using (var conn = GetConnection())
+            {
+                result = ExecuteNonQuery(conn, query);
+            }
+
+            return result;
+        }
+
+        private List<Model.Task> GetTasks(SQLiteDataReader reader)
+        {
+            List<Model.Task> list = new List<Model.Task>();
+            while (reader.Read())
+            {
+                var task = new Model.Task();
+                task.ID = reader[0].ToString();
+                task.Title = reader[1].ToString();
+                task.Description = reader[2].ToString();
+                task.CreationDate = DateTime.Parse(reader[3].ToString());
+                list.Add(task);
+            }
+            return list;
+        }
+
+
+        private bool ExecuteNonQuery(SQLiteConnection conn, Query.Query query)
+        {
+            conn.Open();
+            var command = conn.CreateCommand();
+            command.CommandText = query.GetQuery();
+            int affectedRows = command.ExecuteNonQuery();
+            conn.Close();
+            return affectedRows > 0;
+        }
+
+        
     }
 }

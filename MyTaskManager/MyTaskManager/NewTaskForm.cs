@@ -32,7 +32,12 @@ namespace MyTaskManager
             string title = titleTextBox.Text.ToString();
             string description = descriptionTextBox.Text.ToString();
 
-            controller.Add(new Model.Task(title, description));
+            var success = controller.Add(new Model.Task(title, description));
+            if (!success)
+            {
+                MessageBox.Show("Add new task failed!");
+                return;
+            }
 
             this.Close();
             this.Dispose();
